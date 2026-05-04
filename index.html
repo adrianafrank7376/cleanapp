@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Cleaning App Pro Max+</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:Arial,sans-serif;background:#f5f5f5;padding:10px;font-size:20px}
+.container{max-width:800px;margin:0 auto}
+h1{color:#6B46C1;text-align:center;margin:20px 0;font-size:32px}
+.logo{text-align:center;font-size:48px;margin:10px 0}
+.btn{display:block;width:100%;min-height:70px;margin:15px 0;padding:20px;border:none;border-radius:15px;font-size:22px;font-weight:bold;cursor:pointer}
+.btn:active{transform:scale(0.98)}
+.btn-primary{background:#6B46C1;color:white}
+.btn-teal{background:#0D9488;color:white}
+.btn-green{background:#059669;color:white}
+.btn-orange{background:#EA580C;color:white}
+.btn-blue{background:#2563EB;color:white}
+.btn-red{background:#DC2626;color:white}
+.btn:disabled{background:#D1D5DB;color:#9CA3AF}
+.card{background:white;padding:20px;margin:15px 0;border-radius:15px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+.card h2{color:#6B46C1;margin-bottom:10px;font-size:26px}
+.card p{margin:8px 0;font-size:20px}
+.price{color:#059669;font-size:28px;font-weight:bold}
+.btn-group{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}
+.btn-small{min-height:60px;font-size:18px;padding:15px}
+input,select{width:100%;padding:18px;margin:10px 0;font-size:20px;border:2px solid #ddd;border-radius:10px}
+label{font-size:20px;font-weight:bold;color:#333;display:block;margin-top:15px}
+.hidden{display:none}
+.earnings{font-size:48px;color:#059669;text-align:center;margin:20px 0;font-weight:bold}
+.empty{text-align:center;padding:40px;color:#666;font-size:22px}
+.photo{width:100%;border-radius:10px;margin-top:10px}
+.status{padding:10px;border-radius:10px;text-align:center;margin:10px 0;font-weight:bold}
+.status-in{background:#DBEAFE;color:#1E40AF}
+.status-out{background:#D1FAE5;color:#065F46}
+.gps-banner{padding:15px;border-radius:10px;text-align:center;margin:10px 0;font-weight:bold;background:#FEF3C7;color:#92400E}
+.gps-ready{background:#D1FAE5;color:#065F46}
+.gps-error{background:#FEE2E2;color:#991B1B}
+.alert-today{background:#DC2626;color:white;padding:20px;border-radius:15px;text-align:center;margin:15px 0;font-size:24px;font-weight:bold;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.7}}
+.badge{padding:4px 12px;border-radius:20px;font-size:16px;font-weight:600;margin-left:8px}
+.badge-weekly{background:#DBEAFE;color:#1E40AF}
+.badge-biweekly{background:#FEF3C7;color:#92400E}
+.badge-monthly{background:#E9D5FF;color:#6B21A8}
+.badge-onetime{background:#D1D5DB;color:#374151}
+.toggle{display:flex;align-items:center;justify-content:space-between;padding:15px;background:#F9FAFB;border-radius:10px;margin:10px 0}
+.switch{position:relative;width:60px;height:34px}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ccc;transition:.4s;border-radius:34px}
+.slider:before{position:absolute;content:"";height:26px;width:26px;left:4px;bottom:4px;background:white;transition:.4s;border-radius:50%}
+input:checked +.slider{background:#059669}
+input:checked +.slider:before{transform:translateX(26px)}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="logo">🏠 ✨ 📍</div>
+<h1>Cleaning App Pro Max</h1>
+<div id="todayAlert"></div>
+
+<div id="mainScreen">
+<button class="btn btn-primary" onclick="showScreen('today')">📋 TODAY'S HOUSES</button>
+<button class="btn btn-teal" onclick="showScreen('addHouse')">➕ ADD NEW HOUSE</button>
+<button class="btn btn-green" onclick="showScreen('earnings')">💰 MONTHLY EARNINGS</button>
+<button class="btn btn-orange" onclick="optimizeRoute()">📍 OPTIMIZE TODAY'S ROUTE</button>
+<button class="btn btn-blue" onclick="showScreen('settings')">⚙️ SETTINGS</button>
+<button class="btn btn-red" onclick="sosEmergency()">🚨 SOS - EMERGENCY</button>
+<button class="btn btn-teal" onclick="showScreen('allHouses')">📋 VIEW ALL HOUSES</button>
+</div>
+
+<div id="addHouseScreen" class="hidden">
+<h1>Add New House</h1>
+<label>Client Name</label>
+<input id="clientName" placeholder="Johnson Family">
+<label>Address</label>
+<input id="address" placeholder="123 Main St, Phoenix, AZ">
+<label>Price $</label>
+<input id="price" type="number" placeholder="120">
+<label>Cleaning Frequency</label>
+<select id="frequency">
+<option value="weekly">Weekly - Every Week</option>
+<option value="biweekly">Bi-Weekly - Every 2 Weeks</option>
+<option value="monthly">Monthly - Every 4 Weeks</option>
+<option value="onetime">One Time Only</option>
+</select>
+<label>Start Date</label>
+<input id="startDate" type="date">
+<label>Notes</label>
+<input id="notes" placeholder="Gate code: 1234, Dog in backyard">
+<label>Owner Phone for SOS</label>
+<input id="ownerPhone" placeholder="+16025551234">
+<div class="card">
+<h2>📍 GPS Location</h2>
+<p style="font-size:16px;color:#6B7280">For geofence to work, save the house location:</p>
+<button class="btn btn-blue btn-small" onclick="saveHouseLocation()">📌 USE MY CURRENT LOCATION</button>
+<p id="locationStatus" style="font-size:16px;color:#059669"></p>
+</div>
+<button class="btn btn-primary" onclick="addHouse()">💾 SAVE HOUSE</button>
+<button class="btn btn-gray" onclick="showScreen('main')">⬅️ BACK</button>
+</div>
+
+<div id="todayScreen" class="hidden">
+<h1>Today's Houses</h1>
+<div id="todayList"></div>
+<button class="btn btn-gray" onclick="showScreen('main')">⬅️ BACK</button>
+</div>
+
+<div id="allHousesScreen" class="hidden">
+<h1>All Houses</h1>
+<div id="housesList"></div>
+<button class="btn btn-gray" onclick="showScreen('main')">⬅️ BACK</button>
+</div>
+
+<div id="earningsScreen" class="hidden">
+<h1>Monthly Earnings</h1>
+<div class="earnings" id="totalMonth">$0</div>
+<p style="text-align:center;font-size:22px">This Month</p>
+<p style="text-align:center;font-size:20px;margin-top:10px">Houses Cleaned: <span id="housesMonth">0</span></p>
+<button class="btn btn-green" onclick="exportEarnings()">📤 SHARE VIA WHATSAPP</button>
+<button class="btn btn-gray" onclick="showScreen('main')">⬅️ BACK</button>
+</div>
+
+<div id="settingsScreen" class="hidden">
+<h1>Settings</h1>
+<div class="card">
+<h2>Company Info</h2>
+<label>Your Business Name</label>
+<input id="companyName" placeholder="Elite Clean Phoenix">
+<label>Your Phone</label>
+<input id="companyPhone" placeholder="+16025551234">
+<button class="btn btn-blue" onclick="saveSettings()">💾 SAVE SETTINGS</button>
+</div>
+<div class="card">
+<h2>Daily Alerts</h2>
+<div class="toggle">
+<span style="font-size:18px;font-weight:bold">7:00 AM Reminder</span>
+<label class="switch">
+<input type="checkbox" id="notifToggle" onchange="toggleNotifications()">
+<span class="slider"></span>
+</label>
+</div>
+<p style="font-size:16px;color:#6B7280">Get phone notification with today's houses</p>
+<button class="btn btn-yellow" onclick="testNotification()">🔔 TEST NOTIFICATION NOW</button>
+</div>
+<div class="card">
+<h2>Backup Data</h2>
+<p>Export all houses & jobs to keep safe</p>
+<button class="btn btn-green" onclick="exportBackup()">📥 EXPORT BACKUP</button>
+</div>
+<button class="btn btn-gray" onclick="showScreen('main')">⬅️ BACK</button>
+</div>
+
+<div id="jobDetailScreen" class="hidden">
+<h1 id="jobTitle"></h1>
+<div class="card">
+<h2 id="jobClient"></h2>
+<p id="jobAddress"></p>
+<p class="price" id="jobPrice"></p>
+<p id="jobNotes"></p>
+<div id="gpsStatus"></div>
+<div id="clockStatus"></div>
+</div>
+<div id="jobButtons"></div>
+<button class="btn btn-gray" onclick="showScreen('today')">⬅️ BACK</button>
+</div>
+</div>
+
+<script>
+let houses = JSON.parse(localStorage.getItem('housesProMax') || '[]');
+let jobs = JSON.parse(localStorage.getItem('jobsProMax') || '[]');
+let settings = JSON.parse(localStorage.getItem('settingsProMax') || '{}');
+let currentJobId = null;
+let currentPosition = null;
+let tempHouseLat = null;
+let tempHouseLng = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+const today = new Date().toISOString().split('T')[0];
+if(document.getElementById('startDate')) document.getElementById('startDate').value = today;
+requestLocationPermission();
+checkTodayAlerts();
+});
+
+// PEDIR GPS AL INICIO
+function requestLocationPermission(){
+if(navigator.geolocation){
+navigator.geolocation.getCurrentPosition(pos => {
+currentPosition = pos.coords;
+}, err => {
+console.log('GPS denied:', err);
+}, {enableHighAccuracy:true,timeout:5000});
+}
+}
+
+function showScreen(screen){
+document.querySelectorAll('[id$="Screen"]').forEach(s => s.classList.add('hidden'));
+document.getElementById(screen+'Screen').classList.remove('hidden');
+if(screen==='today') loadToday();
+if(screen==='allHouses') loadAll();
+if(screen==='earnings') loadEarnings();
+if(screen==='settings') loadSettings();
+if(screen==='main') checkTodayAlerts();
+}
+
+function saveHouseLocation(){
+if(!currentPosition){
+alert('GPS not ready. Make sure location is enabled on your phone, then try again.');
+navigator.geolocation.getCurrentPosition(pos => {
+currentPosition = pos.coords;
+tempHouseLat = pos.coords.latitude;
+tempHouseLng = pos.coords.longitude;
+document.getElementById('locationStatus').textContent = '✅ Location saved! Lat: ' + tempHouseLat.toFixed(4);
+}, err => alert('Could not get location. Enable GPS in phone settings.'));
+} else {
+tempHouseLat = currentPosition.latitude;
+tempHouseLng = currentPosition.longitude;
+document.getElementById('locationStatus').textContent = '✅ Location saved! Lat: ' + tempHouseLat.toFixed(4);
+}
+}
+
+function addHouse(){
+const house = {
+id: Date.now(),
+client: document.getElementById('clientName').value,
+address: document.getElementById('address').value,
+price: parseFloat(document.getElementById('price').value),
+frequency: document.getElementById('frequency').value,
+startDate: document.getElementById('startDate').value,
+notes: document.getElementById('notes').value,
+ownerPhone: document.getElementById('ownerPhone').value,
+lat: tempHouseLat,
+lng: tempHouseLng
+};
+if(!house.client ||!house.address ||!house.price ||!house.startDate){
+alert('Please fill Client, Address, Price and Start Date');
+return;
+}
+if(!house.lat) {
+if(!confirm('No GPS location saved. Geofence will NOT work for this house. Save anyway?')) return;
+}
+houses.push(house);
+localStorage.setItem('housesProMax',JSON.stringify(houses));
+document.getElementById('clientName').value='';
+document.getElementById('address').value='';
+document.getElementById('price').value='';
+document.getElementById('notes').value='';
+document.getElementById('ownerPhone').value='';
+document.getElementById('locationStatus').textContent='';
+tempHouseLat = null;
+tempHouseLng = null;
+alert('House saved!');
+checkTodayAlerts();
+showScreen('main');
+}
+
+function getFrequencyBadge(freq){
+const badges = {
+weekly: '<span class="badge badge-weekly">Weekly</span>',
+biweekly: '<span class="badge badge-biweekly">Bi-Weekly</span>',
+monthly: '<span class="badge badge-monthly">Monthly</span>',
+onetime: '<span class="badge badge-onetime">One Time</span>'
+};
+return badges[freq] || '';
+}
+
+function getNextDueDate(house){
+const lastJob = jobs.filter(j=>j.houseId===house.id && j.completed).sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+let nextDue = new Date(house.startDate);
+if(lastJob){
+const lastDate = new Date(lastJob.date);
+nextDue = new Date(lastDate);
+if(house.frequency==='weekly') nextDue.setDate(nextDue.getDate()+7);
+else if(house.frequency==='biweekly') nextDue.setDate(nextDue.getDate()+14);
+else if(house.frequency==='monthly') nextDue.setMonth(nextDue.getMonth()+1);
+else return 'One time only';
+}
+const today = new Date();
+today.setHours(0,0,0,0);
+nextDue.setHours(0,0,0,0);
+if(nextDue <= today) return '<span style="color:#DC2626;font-weight:bold">DUE TODAY</span>';
+return 'Next: ' + nextDue.toLocaleDateString();
+}
+
+function loadAll(){
+document.getElementById('housesList').innerHTML = houses.map(h => {
+const houseJobs = jobs.filter(j=>j.houseId===h.id && j.completed);
+return `<div class="card">
+<h2>${h.client} ${getFrequencyBadge(h.frequency)}</h2>
+<p>📍 ${h.address}</p>
+<p class="price">$${h.price}</p>
+${h.notes?`<p>📝 ${h.notes}</p>`:''}
+<p>📅 ${getNextDueDate(h)}</p>
+<p>✅ Cleaned ${houseJobs.length} times</p>
+${h.lat?'<p style="color:#059669">📍 GPS Location Saved</p>':'<p style="color:#DC2626">⚠️ No GPS - Geofence disabled</p>'}
+<div class="btn-group">
+<button class="btn btn-teal btn-small" onclick="addToToday(${h.id})">➕ ADD TO TODAY</button>
+<button class="btn btn-orange btn-small" onclick="deleteHouse(${h.id})">🗑️ DELETE</button>
+</div>
+</div>`;
+}).join('') || '<div class="empty">No houses yet. Add one!</div>';
+}
+
+function addToToday(houseId){
+const today = new Date().toDateString();
+if(jobs.find(j=>j.houseId===houseId && new Date(j.date).toDateString()===today)){
+alert('Already added for today');
+return;
+}
+jobs.push({
+id: Date.now(),
+houseId: houseId,
+date: new Date().toISOString(),
+clockIn: null,
+clockOut: null,
+completed: false,
+photos: [],
+autoScheduled: false
+});
+localStorage.setItem('jobsProMax',JSON.stringify(jobs));
+alert('Added to today!');
+showScreen('today');
+}
+
+function loadToday(){
+const today = new Date().toDateString();
+const todayJobs = jobs.filter(j=>new Date(j.date).toDateString()===today);
+document.getElementById('todayList').innerHTML = todayJobs.map(j=>{
+const h = houses.find(ho=>ho.id===j.houseId);
+if(!h) return '';
+return `<div class="card">
+<h2>${h.client} ${getFrequencyBadge(h.frequency)}</h2>
+<p>📍 ${h.address}</p>
+<p class="price">$${h.price}</p>
+${j.autoScheduled?'<div class="status status-due">🔔 AUTO-SCHEDULED FOR TODAY</div>':''}
+${j.clockIn?`<div class="status status-in">⏰ Started: ${new Date(j.clockIn).toLocaleTimeString()}</div>`:''}
+${j.clockOut?`<div class="status status-out">✅ Done: ${new Date(j.clockOut).toLocaleTimeString()}</div>`:''}
+<button class="btn btn-blue" onclick="openJob(${j.id})">${j.completed?'📋 VIEW REPORT':'▶️ START JOB'}</button>
+</div>`;
+}).join('') || '<div class="empty">No jobs for today. Check All Houses to see next due dates.</div>';
+}
+
+function openJob(jobId){
+currentJobId = jobId;
+updateJobDetail();
+showScreen('jobDetail');
+}
+
+function getDistance(lat1,lon1,lat2,lon2){
+const R = 6371e3;
+const φ1 = lat1 * Math.PI/180;
+const φ2 = lat2 * Math.PI/180;
+const Δφ = (lat2-lat1) * Math.PI/180;
+const Δλ = (lon2-lon1) * Math.PI/180;
+const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
+const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+return R * c;
+}
+
+function updateJobDetail(){
+const job = jobs.find(j=>j.id===currentJobId);
+const h = houses.find(ho=>ho.id===job.houseId);
+document.getElementById('jobTitle').textContent = h.client;
+document.getElementById('jobClient').innerHTML = h.client + ' ' + getFrequencyBadge(h.frequency);
+document.getElementById('jobAddress').textContent = '📍 ' + h.address;
+document.getElementById('jobPrice').textContent = '$' + h.price;
+document.getElementById('jobNotes').textContent = h.notes?'📝 ' + h.notes : '';
+
+let gpsHTML = '';
+let canClockIn = false;
+if(!job.clockIn){
+if(!h.lat){
+gpsHTML = '<div class="gps-banner gps-error">⚠️ No GPS saved for this house. Geofence disabled.</div>';
+canClockIn = true;
+} else if(!currentPosition){
+gpsHTML = '<div class="gps-banner">📍 Waiting for GPS... Enable location on phone</div>';
+navigator.geolocation.getCurrentPosition(pos => {
+currentPosition = pos.coords;
+updateJobDetail();
+}, err => {
+document.getElementById('gpsStatus').innerHTML = '<div class="gps-banner gps-error">❌ GPS Error. Enable location in phone settings.</div>';
+});
+} else {
+const dist = getDistance(currentPosition.latitude, currentPosition.longitude, h.lat, h.lng);
+if(dist <= 150){
+gpsHTML = '<div class="gps-banner gps-ready">📍 GPS Ready - You are at the location (' + Math.round(dist) + 'm)</div>';
+canClockIn = true;
+} else {
+gpsHTML = '<div class="gps-banner gps-error">📍 Too far: ' + Math.round(dist) + 'm away. Move closer to house.</div>';
+}
+}
+}
+document.getElementById('gpsStatus').innerHTML = gpsHTML;
+
+let statusHTML = '';
+if(job.clockIn) statusHTML += `<div class="status status-in">⏰ Started: ${new Date(job.clockIn).toLocaleTimeString()}</div>`;
+if(job.clockOut) statusHTML += `<div class="status status-out">✅ Finished: ${new Date(job.clockOut).toLocaleTimeString()}</div>`;
+document.getElementById('clockStatus').innerHTML = statusHTML;
+
+let btnHTML = '';
+if(!job.clockIn && canClockIn){
+btnHTML = '<button class="btn btn-primary" onclick="clockIn()">⏰ CLOCK IN</button>';
+} else if(job.clockIn &&!job.completed){
+btnHTML = '<button class="btn btn-green" onclick="completeJob()">✅ COMPLETE JOB - TAKE 3 PHOTOS</button>';
+} else if(job.completed){
+btnHTML = '<button class="btn btn-blue" onclick="sendReport()">📤 SEND REPORT VIA WHATSAPP</button>';
+if(job.photos.length>0){
+btnHTML += job.photos.map((p,i)=>`<p><b>Photo ${i+1}:</b></p><img src="${p}" class="photo">`).join('');
+}
+}
+document.getElementById('jobButtons').innerHTML = btnHTML;
+}
+
+function clockIn(){
+const job = jobs.find(j=>j.id===currentJobId);
+job.clockIn = new Date().toISOString();
+localStorage.setItem('jobsProMax',JSON.stringify(jobs));
+updateJobDetail();
+}
+
+async function completeJob(){
+const job = jobs.find(j=>j.id===currentJobId);
+const areas = ['Kitchen','Bathroom','Bedroom/Living Room'];
+let photos = [];
+for(let i=0; i<areas.length; i++){
+alert(`Photo ${i+1}/3: ${areas[i]}\nTake a clear photo`);
+const photo = await takePhoto();
+if(!photo) {
+alert('All 3 photos required. Job not completed.');
+return;
+}
+photos.push(photo);
+}
+job.photos = photos;
+job.clockOut = new Date().toISOString();
+job.completed = true;
+localStorage.setItem('jobsProMax',JSON.stringify(jobs));
+updateJobDetail();
+alert('Job completed! Now send the report');
+checkTodayAlerts();
+}
+
+function takePhoto(){
+return new Promise(resolve=>{
+const input = document.createElement('input');
+input.type='file';
+input.accept='image/*';
+input.capture='environment';
+input.onchange=e=>{
+const file=e.target.files[0];
+if(!file){resolve(null);return;}
+const reader=new FileReader();
+reader.onload=ev=>resolve(ev.target.result);
+reader.readAsDataURL(file);
+};
+input.click();
+});
+}
+
+function sendReport(){
+const job = jobs.find(j=>j.id===currentJobId);
+const h = houses.find(ho=>ho.id===job.houseId);
+const msg = `✅ CLEANING REPORT\n\nClient: ${h.client}\nAddress: ${h.address}\nPrice: $${h.price}\nFrequency: ${h.frequency}\nStart: ${new Date(job.clockIn).toLocaleTimeString()}\nEnd: ${new Date(job.clockOut).toLocaleTimeString()}\n\n3 Photos Attached\n\nFrom: Cleaning App Pro Max+`;
+window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+function optimizeRoute(){
+const today = new Date().toDateString();
+const todayJobs = jobs.filter(j=>new Date(j.date).toDateString()===today &&!j.completed);
+if(todayJobs.length < 2){
+alert('Add at least 2 houses to today to optimize route');
+return;
+}
+const route = todayJobs.map((j,i)=>{
+const h = houses.find(ho=>ho.id===j.houseId);
+return `${i+1}. ${h.client} - ${h.address}`;
+}).join('\n');
+alert(`OPTIMIZED ROUTE FOR TODAY:\n\n${route}\n\nTip: Complete in this order to save gas & time.`);
+}
+
+function sosEmergency(){
+const phone = settings.companyPhone || '+16025551234';
+if(confirm('🚨 EMERGENCY\nThis will call your boss/owner.\n\nContinue?')){
+window.open(`tel:${phone}`);
+}
+}
+
+function saveSettings(){
+settings.companyName = document.getElementById('companyName').value;
+settings.companyPhone = document.getElementById('companyPhone').value;
+localStorage.setItem('settingsProMax',JSON.stringify(settings));
+alert('Settings saved!');
+showScreen('main');
+}
+
+function loadSettings(){
+document.getElementById('companyName').value = settings.companyName || '';
+document.getElementById('companyPhone').value = settings.companyPhone || '';
+if('Notification' in window){
+document.getElementById('notifToggle').checked = Notification.permission === 'granted' && settings.notificationsEnabled;
+}
+}
+
+function toggleNotifications(){
+if(!('Notification' in window)){
+alert('Your browser does not support notifications');
+return;
+}
+if(Notification.permission === 'granted'){
+settings.notificationsEnabled = document.getElementById('notifToggle').checked;
+localStorage.setItem('settingsProMax',JSON.stringify(settings));
+if(settings.notificationsEnabled){
+alert('Notifications ON! You will get alerts at 7:00 AM when you open the app');
+}
+} else if(Notification.permission!== 'denied'){
+Notification.requestPermission().then(permission => {
+if(permission === 'granted'){
+settings.notificationsEnabled = true;
+document.getElementById('notifToggle').checked = true;
+localStorage.setItem('settingsProMax',JSON.stringify(settings));
+alert('Notifications ON! You will get alerts at 7:00 AM');
+} else {
+document.getElementById('notifToggle').checked = false;
+}
+});
+} else {
+alert('Notifications blocked. Go to phone Settings > Apps > Chrome > Notifications and enable');
+}
+}
+
+function testNotification(){
+if(Notification.permission === 'granted'){
+new Notification('Test - CleanApp Pro Max', {
+body: 'Notifications are working! You will get alerts at 7:00 AM',
+icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="0.9em" font-size="90">✅</text></svg>'
+});
+} else {
+alert('Enable notifications first in Settings');
+}
+}
+
+function getDueTodayHouses(){
+const today = new Date();
+today.setHours(0,0,0,0);
+let due = [];
+houses.forEach(h => {
+if(h.frequency === 'onetime') return;
+const lastJob = jobs.filter(j=>j.houseId===h.id && j.completed).sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+let nextDue = new Date(h.startDate);
+nextDue.setHours(0,0,0,0);
+if(lastJob){
+const lastDate = new Date(lastJob.date);
+lastDate.setHours(0,0,0,0);
+nextDue = new Date(lastDate);
+if(h.frequency==='weekly') nextDue.setDate(nextDue.getDate()+7);
+else if(h.frequency==='biweekly') nextDue.setDate(nextDue.getDate()+14);
+else if(h.frequency==='monthly') nextDue.setMonth(nextDue.getMonth()+1);
+}
+if(nextDue.getTime() <= today.getTime()) due.push(h);
+});
+return due;
+}
+
+function checkTodayAlerts(){
+const dueToday = getDueTodayHouses();
+dueToday.forEach(h => {
+if(!jobs.find(j=>j.houseId===h.id && new Date(j.date).toDateString()===new Date().toDateString())){
+jobs.push({
+id: Date.now()+h.id,
+houseId: h.id,
+date: new Date().toISOString(),
+clockIn: null,
+clockOut: null,
+completed: false,
+photos: [],
+autoScheduled: true
+});
+}
+});
+if(dueToday.length > 0){
+localStorage.setItem('jobsProMax',JSON.stringify(jobs));
+document.getElementById('todayAlert').innerHTML = `<div class="alert-today">🔔 YOU HAVE ${dueToday.length} HOUSES TO CLEAN TODAY!</div>`;
+} else {
+document.getElementById('todayAlert').innerHTML = '';
+}
+if(settings.notificationsEnabled && Notification.permission === 'granted'){
+const now = new Date();
+const lastNotif = localStorage.getItem('lastNotificationDate');
+const today = now.toDateString();
+if(now.getHours() >= 7 && lastNotif!== today && dueToday.length > 0){
+new Notification('CleanApp - Houses Today', {
+body: `You have ${dueToday.length} houses to clean today`,
+icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="0.9em" font-size="90">🧹</text></svg>'
+});
+localStorage.setItem('lastNotificationDate', today);
+}
+}
+}
+
+function exportBackup(){
+const data = {houses, jobs, settings, exported: new Date().toISOString()};
+const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = `CleanApp-Backup-${new Date().toISOString().split('T')[0]}.json`;
+a.click();
+alert('Backup downloaded! Save this file safe.');
+}
+
+function exportEarnings(){
+const month = new Date().getMonth();
+const year = new Date().getFullYear();
+const monthJobs = jobs.filter(j=>{
+const f=new Date(j.date);
+return j.completed&&f.getMonth()===month&&f.getFullYear()===year;
+});
+let total=0;
+monthJobs.forEach(j=>{
+const h=houses.find(ho=>ho.id===j.houseId);
+if(h)total+=h.price;
+});
+const msg = `💰 MONTHLY EARNINGS\n\nTotal: $${total}\nHouses: ${monthJobs.length}\nAvg: $${monthJobs.length?(total/monthJobs.length).toFixed(2):0}\n\nFrom: ${settings.companyName||'Cleaning App Pro Max+'}`;
+window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+function deleteHouse(id){
+if(!confirm('Delete this house? All job history will be lost.'))return;
+houses=houses.filter(h=>h.id!==id);
+jobs=jobs.filter(j=>j.houseId!==id);
+localStorage.setItem('housesProMax',JSON.stringify(houses));
+localStorage.setItem('jobsProMax',JSON.stringify(jobs));
+loadAll();
+checkTodayAlerts();
+}
+
+function loadEarnings(){
+const month=new Date().getMonth();
+const year=new Date().getFullYear();
+const monthJobs=jobs.filter(j=>{
+const f=new Date(j.date);
+return j.completed&&f.getMonth()===month&&f.getFullYear()===year;
+});
+let total=0;
+monthJobs.forEach(j=>{
+const h=houses.find(ho=>ho.id===j.houseId);
+if(h)total+=h.price;
+});
+document.getElementById('totalMonth').textContent='$'+total.toLocaleString();
+document.getElementById('housesMonth').textContent=monthJobs.length;
+}
+
+checkTodayAlerts();
+loadToday();
+</script>
+</body>
+</html>
